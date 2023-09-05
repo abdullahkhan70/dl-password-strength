@@ -1,0 +1,11 @@
+pandas
+numpy
+Flask
+matplotlib
+seaborn
+dill
+scipy
+torch
+torchvision
+torchaudio
+-e .
