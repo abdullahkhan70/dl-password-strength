@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import TruncatedSVD
 
 
 @dataclass
@@ -26,7 +27,7 @@ class DataTransformer:
 
     def get_device(self):
         if torch.cuda.is_available():
-            device = torch.device('cuda:0')
+            device = torch.device('cuda')
         else:
             device == torch.device('cpu')
 
@@ -69,26 +70,42 @@ class DataTransformer:
                 X_train)
             tfidf_X_test = vectorizer.transform(X_test)
 
+            # Print the Shape of Tf-Idf train and test:
+            print(f"TF-IDF X_train shape is: {tfidf_X_train.shape}")
+            print(f"TF-IDF X_train shape is: {tfidf_X_test.shape}")
+
+            # Reducing the Dimensionality.
+            svd = TruncatedSVD(
+                n_components=1, random_state=np.random.seed(42))
+            X_train = svd.fit_transform(tfidf_X_train)
+            X_test = svd.transform(tfidf_X_test)
+
             print(f"TF-IDR Vectorizer Type: {type(tfidf_X_train)}")
 
             # Convert the X_train and y_train into Pytorch Tensor.
             device = self.get_device()
-            X_train = torch.tensor(scipy.sparse.csr_matrix.todense(
-                tfidf_X_train)).float().to(device)
+            # X_train = torch.tensor(scipy.sparse.csr_matrix.todense(
+            #     tfidf_X_train)).float().to(device)
 
-            X_test = torch.tensor(scipy.sparse.csr_matrix.todense(
-                tfidf_X_test)).float().to(device)
+            # X_test = torch.tensor(scipy.sparse.csr_matrix.todense(
+            #     tfidf_X_test)).float().to(device)
 
-            y_train = torch.tensor(y_train.values).float().to(device)
-            y_test = torch.tensor(y_test.values).float().to(device)
+            X_train = torch.tensor(X_train).float().to(device)
+            X_test = torch.tensor(X_test).float().to(device)
 
-            # Print out the converted X_train and y_train data.
-            print(f"X_train Tensor is: {X_train}")
-            print(f"y_train Tensor is: {y_train}")
+            y_train = torch.tensor(np.ravel(y_train.values)).long().to(device)
+            y_test = torch.tensor(np.ravel(y_test.values)).long().to(device)
+
+            # Print out the converted X_train and y_train data shape.
+            print(f"X_train Tensor Shape is: {X_train.shape}")
+            print(f"X_test Tensor Shape is: {X_test.shape}")
+            print(f"y_train Tensor Shape is: {y_train.shape}")
 
             # Print out the Types of converted X_train and y_train.
             print(f"X_train Tensor Type is: {type(X_train)}")
             print(f"y_train Tensor Type is: {type(y_train)}")
+
+            return (X_train, X_test, y_train, y_test)
 
         except Exception as error:
             raise CustomException(error, sys)
