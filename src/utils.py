@@ -1,11 +1,11 @@
 import os
 import sys
 import dill
-from exceptions import CustomException
-from logger import logging
+from .exception import CustomException
+from .logger import logging
 
 
-def save_object(file_path: str, obj):
+def save_object(file_path: str, obj: any = None):
     try:
         dirname = os.path.dirname(file_path)
         print(f"Saving the Model at: {dirname}")

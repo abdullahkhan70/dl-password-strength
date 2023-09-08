@@ -6,6 +6,7 @@ import scipy
 import torch
 from src.exception import CustomException
 from src.logger import logging
+from src.utils import save_object
 from dataclasses import dataclass
 from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
@@ -15,8 +16,10 @@ from sklearn.decomposition import TruncatedSVD
 
 @dataclass
 class DataTransformationConfig:
-    preprocessing_file_path: str = os.path.join(
-        'artifacts', 'preprocessing.pkl')
+    tfidf_vectorizer_file_path: str = os.path.join(
+        'artifacts', 'tfidf_vectorizer.pkl')
+    svd_file_path: str = os.path.join(
+        'artifacts', 'svd.pkl')
 
 
 @dataclass
@@ -65,7 +68,7 @@ class DataTransformer:
                 X_test.values.reshape(-1, 1)).ravel()
 
             # Convert training and testing into TF-IDR
-            vectorizer = TfidfVectorizer()
+            vectorizer = TfidfVectorizer(analyzer='char')
             tfidf_X_train = vectorizer.fit_transform(
                 X_train)
             tfidf_X_test = vectorizer.transform(X_test)
@@ -84,11 +87,15 @@ class DataTransformer:
 
             # Convert the X_train and y_train into Pytorch Tensor.
             device = self.get_device()
-            # X_train = torch.tensor(scipy.sparse.csr_matrix.todense(
-            #     tfidf_X_train)).float().to(device)
 
-            # X_test = torch.tensor(scipy.sparse.csr_matrix.todense(
-            #     tfidf_X_test)).float().to(device)
+            save_object(
+                self.data_transformation_config.tfidf_vectorizer_file_path,
+                vectorizer
+            )
+            save_object(
+                self.data_transformation_config.svd_file_path,
+                svd
+            )
 
             X_train = torch.tensor(X_train).float().to(device)
             X_test = torch.tensor(X_test).float().to(device)

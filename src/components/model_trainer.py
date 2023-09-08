@@ -11,7 +11,21 @@ from dataclasses import dataclass
 
 @dataclass
 class ModelTrainerConfig:
-    model_file_path: str = os.path.join('artifacts', 'model.pth')
+    model_file_path: str = os.path.join('artifacts', 'model.pt')
+
+
+class TrainModel(nn.Module):
+    def __init__(self, in_features: int):
+        super().__init__()
+        df = pd.read_csv('artifacts/raw.csv')
+        self.linear_1 = nn.Linear(in_features, 64).to('cuda')
+        self.relu = nn.ReLU().to('cuda')
+        self.linear_2 = nn.Linear(64, df['password'].nunique()).to('cuda')
+        self.soft_max = nn.LogSoftmax(dim=1).to('cuda')
+
+    def forward(self, x):
+        x = self.soft_max(self.linear_2(self.relu(self.linear_1(x))))
+        return x
 
 
 class ModelTrainer:
@@ -24,20 +38,9 @@ class ModelTrainer:
                     y_train: torch.TensorType,
                     y_test: torch.TensorType):
         try:
-            df = pd.read_csv('artifacts/raw.csv')
+
             # Define the Model Layers.
-            # model = nn.Sequential(
-            #     nn.Conv2d(16, 8, 3, stride=(2, 2), padding=(2, 2)),
-            #     nn.ReLU(),
-            #     nn.Conv2d(16, 8, 3, stride=(2, 2), padding=(2, 2)),
-            #     nn.LogSoftmax(dim=1)
-            # )
-            model = nn.Sequential(
-                nn.Linear(X_train.shape[1], 64).to('cuda'),
-                nn.ReLU().to('cuda'),
-                nn.Linear(64, df['password'].nunique()).to('cuda'),
-                nn.LogSoftmax(dim=1).to('cuda')
-            )
+            model = TrainModel(in_features=X_train.shape[1])
 
             # Define the Model's Loss.
             criterion = nn.NLLLoss().to('cuda')
