@@ -52,10 +52,8 @@ This project is under the [MIT](https://choosealicense.com/licenses/mit/) Licens
 
 We have made another solution using Machine Learning algorithms only. Here is the link of our [Github Project](https://github.com/abdullahkhan70/ml-password-strength).
 
-## <u>**Special Thanks**</u>
+## <u>**Reference**</u>
 
 **Special thanks to Efim Polianskii, and here are his social links**
 
-[Linkedin](https://www.linkedin.com/in/efimpolianskii/) | 
-[Github](https://github.com/efimpolianskii) | 
-[Kaggle-solution](https://www.kaggle.com/code/timmofeyy/machine-learning-password-weakness-prediction/)
+[Github](https://github.com/efimpolianskii)
