@@ -9,4 +9,5 @@ scipy
 torch
 torchvision
 torchaudio
+gunicorn
 -e .
